@@ -1,0 +1,105 @@
+---
+const projectIndex = "/projects/";
+const pageTitle = 'Limelight Event Services | Projects';
+const pageDesc = 'Limelight Event Services, Inverness, Scotland | Our succesfully completed projects';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectsHero from '../../components/ProjectsHero.astro';
+import { Image } from 'astro:assets';
+
+const response = await fetch('https://graphql.datocms.com/', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+    Authorization: `Bearer ${import.meta.env.DATOCMS_API_KEY}`,
+  },
+  body: JSON.stringify({
+    query: `query {
+      allProjects {
+        title
+        excerpt
+        projectDates
+        image {
+            url
+          }
+          slug
+        }
+      }
+    `,
+  }),
+});
+
+const json = await response.json();
+const projectData = json.data.allProjects;
+---
+
+<style>
+
+  .project-post {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 50px;
+    width: 100%;
+    min-height: 325px;
+  }
+  @media screen and (min-width: 600px) {
+      .project-post {
+          flex-direction: row;
+      }
+  }
+
+  .blog-listing-text {
+    width: auto;
+    padding: 30px;
+    background: #dddddd;
+    border-bottom-right-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    position: relative;
+  }
+  @media screen and (min-width: 600px) {
+    .blog-listing-text {
+        border-top-right-radius: 15px;
+        width: 50%;
+      }
+  }
+  .project-post img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+  @media screen and (min-width: 600px) {
+    .project-post img {
+        width: 50%;
+      }
+  }
+  a {
+    text-decoration: none;
+  }
+
+</style>
+
+<BaseLayout pageTitle={pageTitle} pageDesc={pageDesc}>
+  <ProjectsHero />
+    <section class="centered-1260">
+    {projectData.map((project:any) => (
+        <section class="project-post scroll-reveal animate fadeInBottom">
+          <Image src={project.image.url} alt={project.title} width='880' height='450' />
+          <div class="blog-listing-text">
+            <h2>{project.title}</h2>
+            <p>{project.projectDates}</p>
+            <p>{project.excerpt}</p>
+            <a href={projectIndex + project.slug} class="standard-button-link">Read more</a>
+          </div>
+        </section>  
+      ))}
+  </section>
+</BaseLayout>
+
+<!-- {allPosts.map((post) => <BlogPost url={post.url} title={post.frontmatter.title} />)} -->
+
+<script>
+  import '../../scripts/IntersectionObserver.js';
+</script>
